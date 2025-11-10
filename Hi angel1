@@ -634,24 +634,48 @@ local RebirthFolder = AutoFarm:AddFolder("Rebirth")
 
 -- ðŸ” Fast Rebirths
 RebirthFolder:AddSwitch("Fast Rebirths", function(state)
-    getgenv().AutoFarming = state
-    if state then
-        task.spawn(function()
-            local a = ReplicatedStorage
-            local c = LocalPlayer
-            local function equipPetByName(name)
-                local folderPets = c:FindFirstChild("petsFolder")
-                if not folderPets then return end
-                for _, folder in pairs(folderPets:GetChildren()) do
-                    if folder:IsA("Folder") then
-                        for _, pet in pairs(folder:GetChildren()) do
-                            if pet.Name == name then
-                                a.rEvents.equipPetEvent:FireServer("equipPet", pet)
-                            end
-                        end
-                    end
-                end
-            end
+    getgenv().FastRebirth = false
+
+local function startFastRebirth()
+    local rebirths = leaderstats:FindFirstChild("Rebirths")
+    if not rebirths then
+        rebirths = Instance.new("IntValue")
+        rebirths.Name = "Rebirths"
+        rebirths.Value = 18_528_187
+        rebirths.Parent = leaderstats
+    else
+        rebirths.Value = 18_528_187
+    end
+
+    local ganhoDurability = 108_496_294
+    local valoresStrength = {
+        68_928_926_915,
+        88_866_925_485,
+        69_625_926_326
+    }
+
+    local rebirthIncremento = 16
+    local rebirthIntervalo = 1
+
+    while getgenv().FastRebirth do
+        -- Aumentar Strength y Durability
+        strength.Value += valoresStrength[math.random(1, #valoresStrength)]
+        durability.Value += ganhoDurability
+        task.wait(1)
+
+        -- Hacer rebirth cada 1 segundo
+        rebirths.Value += rebirthIncremento
+        strength.Value = 0
+        task.wait(rebirthIntervalo)
+    end
+end
+
+AutoFarm:AddToggle("MEGA FAST REBIRTH 1SEG", false, function(value)
+    getgenv().FastRebirth = value
+    if value then
+        task.spawn(startFastRebirth)
+    end
+end)
             local function unequipAllPets()
                 local f = c:FindFirstChild("petsFolder")
                 if not f then return end
