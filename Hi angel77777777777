@@ -1,6 +1,6 @@
 local whitelist = {
-    ["ALT_XxG0D0FWARxX"] = true,
-    ["Thomas2345z"] = true,
+    ["thomas2345z"] = true,
+    [""] = true,
     [""] = true,
     [""] = true,
     [""] = true,
@@ -49,14 +49,14 @@ end
 
 
 -- CARGA DE LIBRERÃA
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/keyler02/Librer-a-Angel-s-and-keyzorxx-hub/refs/heads/main/Library"))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/rafael25ic-blip/phoenix-cracked/refs/heads/main/Librerya%20Phoenix%20Crack"))()
 
 -- OBTENER NOMBRE DEL JUGADOR
 local player = game.Players.LocalPlayer
 local displayName = player.DisplayName or player.Name
 
 -- VENTANA PRINCIPAL
-local window = library:AddWindow("Angel's And Keyzorxx | Bienvenido " .. displayName, {
+local window = library:AddWindow("JxssXRafael | Bienvenido " .. displayName, {
     main_color = Color3.fromRGB(0, 0, 0),
     min_size = Vector2.new(600, 820),
     can_resize = false,
@@ -634,8 +634,66 @@ local RebirthFolder = AutoFarm:AddFolder("Rebirth")
 
 -- ðŸ” Fast Rebirths
 RebirthFolder:AddSwitch("Fast Rebirths", function(state)
-    getgenv().FastRebirth = false
-local function startFastRebirth()
+    getgenv().AutoFarming = state
+    if state then
+        task.spawn(function()
+            local a = ReplicatedStorage
+            local c = LocalPlayer
+            local function equipPetByName(name)
+                local folderPets = c:FindFirstChild("petsFolder")
+                if not folderPets then return end
+                for _, folder in pairs(folderPets:GetChildren()) do
+                    if folder:IsA("Folder") then
+                        for _, pet in pairs(folder:GetChildren()) do
+                            if pet.Name == name then
+                                a.rEvents.equipPetEvent:FireServer("equipPet", pet)
+                            end
+                        end
+                    end
+                end
+            end
+            local function unequipAllPets()
+                local f = c:FindFirstChild("petsFolder")
+                if not f then return end
+                for _, folder in pairs(f:GetChildren()) do
+                    if folder:IsA("Folder") then
+                        for _, pet in pairs(folder:GetChildren()) do
+                            a.rEvents.equipPetEvent:FireServer("unequipPet", pet)
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+            local function getGoldenRebirthCount()
+                local g = c:FindFirstChild("ultimatesFolder")
+                if g and g:FindFirstChild("Golden Rebirth") then
+                    return g["Golden Rebirth"].Value
+                end
+                return 0
+            end
+            local function getStrengthRequiredForRebirth()
+                local rebirths = c.leaderstats.Rebirths.Value
+                local baseStrength = 10000 + (5000 * rebirths)
+                local golden = getGoldenRebirthCount()
+                if golden >= 1 and golden <= 5 then
+                    baseStrength = baseStrength * (1 - golden * 0.1)
+                end
+                return math.floor(baseStrength)
+            end
+            while getgenv().AutoFarming do
+                local requiredStrength = getStrengthRequiredForRebirth()
+                unequipAllPets()
+                equipPetByName("Swift Samurai")
+                while c.leaderstats.Strength.Value < requiredStrength and getgenv().AutoFarming do
+                    for _ = 1, 10 do
+                        c.muscleEvent:FireServer("rep")
+                    end
+                    task.wait()
+                end
+                if getgenv().AutoFarming then
+                    unequipAllPets()
+                    equipPetByName("Tribal Overlord")
+                    local function startFastRebirth()
     local rebirths = leaderstats:FindFirstChild("Rebirths")
     if not rebirths then
         rebirths = Instance.new("IntValue")
@@ -668,14 +726,6 @@ local function startFastRebirth()
         task.wait(rebirthIntervalo)
     end
 end
-
-AutoFarm:AddToggle("MEGA FAST REBIRTH 1SEG", false, function(value)
-    getgenv().FastRebirth = value
-    if value then
-        task.spawn(startFastRebirth)
-    end
-end)
-
 -- ðŸ”’ Lock Position
 RebirthFolder:AddSwitch("Lock Position", function(Value)
     if Value then
@@ -4603,8 +4653,8 @@ Gift:AddButton(
 
 local Credits = window:AddTab("Credits")
 
-Credits:AddLabel("K")
-Credits:AddLabel("L")
-Credits:AddLabel("K")
-Credits:AddLabel("_")
-Credits:AddLabel("klk angel")
+Credits:AddLabel("RAFAELXJXSS")
+Credits:AddLabel("Script Hecho por: Rafael")
+Credits:AddLabel("Tiktok:DeathKiller")
+Credits:AddLabel("MVX ON TOP ðŸ”¥")
+Credits:AddLabel("JASSON MI VIEJA")
