@@ -1,0 +1,496 @@
+-- âš™ï¸ LibrerÃ­a de interfaz
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/HonnyDezz/pruebas/refs/heads/main/libreria%203", true))()
+
+local window = library:AddWindow("OMEGADEZZ LEGENDS VIP / By HonnyDezz", {
+    main_color = Color3.fromRGB(255, 119, 0),
+    min_size = Vector2.new(320, 332),
+    can_resize = true,
+})
+
+-- ðŸ§  Servicios globales
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- =========================
+-- ðŸ“Œ PESTAÃ‘A AUTO FARM
+-- =========================
+local main = window:AddTab("Best FARM")
+
+local megaFastRebirth = false
+local omegaFarmLegends = false
+local autoEatEnabled = false
+
+-- =====================================
+-- ðŸ”¹ Mega Fast FARM / No LAG
+-- =====================================
+main:AddSwitch("Mega Fast FARM / No LAG", function(state)
+    megaFastRebirth = state
+    if not state then
+        getgenv()._AutoRepFarmEnabled = false
+        warn("[Auto Rep Farm] DESACTIVADO")
+        return
+    end
+
+    task.spawn(function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+        local PET_NAME = "Swift Samurai"
+        local ROCK_NAME = "Rock5M"
+        local PROTEIN_EGG_NAME = "ProteinEgg"
+        local PROTEIN_EGG_INTERVAL = 30 * 60
+        local REPS_PER_CYCLE = 8
+        local REP_DELAY = 0.001
+        local ROCK_INTERVAL = 5
+
+        getgenv()._AutoRepFarmEnabled = true
+        warn("[Auto Rep Farm] ACTIVADO (OPTIMIZADO)")
+
+        local HumanoidRootPart
+        local lastProteinEggTime = 0
+        local lastRockTime = 0
+
+        local function updateCharacterRefs()
+            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            HumanoidRootPart = character:WaitForChild("HumanoidRootPart", 5)
+        end
+
+        local function equipPet()
+            local petsFolder = LocalPlayer:FindFirstChild("petsFolder")
+            if petsFolder and petsFolder:FindFirstChild("Unique") then
+                for _, pet in pairs(petsFolder.Unique:GetChildren()) do
+                    if pet.Name == PET_NAME then
+                        ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", pet)
+                        break
+                    end
+                end
+            end
+        end
+
+        local function eatProteinEgg()
+            local backpack = LocalPlayer:FindFirstChild("Backpack")
+            if backpack then
+                for _, item in pairs(backpack:GetChildren()) do
+                    if item.Name == PROTEIN_EGG_NAME then
+                        ReplicatedStorage.rEvents.eatEvent:FireServer("eat", item)
+                        break
+                    end
+                end
+            end
+        end
+
+        local function hitRock()
+            local rock = workspace:FindFirstChild(ROCK_NAME)
+            if rock and HumanoidRootPart then
+                HumanoidRootPart.CFrame = rock.CFrame * CFrame.new(0, 0, -5)
+                ReplicatedStorage.rEvents.hitEvent:FireServer("hit", rock)
+            end
+        end
+
+        updateCharacterRefs()
+        equipPet()
+        lastProteinEggTime = tick()
+
+        while getgenv()._AutoRepFarmEnabled do
+            if LocalPlayer:FindFirstChild("muscleEvent") then
+                for i = 1, REPS_PER_CYCLE do
+                    LocalPlayer.muscleEvent:FireServer("rep")
+                end
+            end
+
+            if tick() - lastProteinEggTime >= PROTEIN_EGG_INTERVAL then
+                eatProteinEgg()
+                lastProteinEggTime = tick()
+            end
+
+            if tick() - lastRockTime >= ROCK_INTERVAL then
+                hitRock()
+                lastRockTime = tick()
+            end
+
+            task.wait(REP_DELAY)
+        end
+    end)
+end)
+
+-- =====================================
+-- ðŸ”¹ Mega Fast REBIRTH / 1 SEG
+-- =====================================
+main:AddSwitch("Mega Fast REBIRTH / 1 SEG", function(state)
+    omegaFarmLegends = state
+    if not state then return end
+
+    task.spawn(function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local globalFunctions = require(ReplicatedStorage:WaitForChild("globalFunctions"))
+
+        local leaderstats = LocalPlayer:WaitForChild("leaderstats")
+        local Strength = leaderstats:WaitForChild("Strength")
+        local Rebirths = leaderstats:WaitForChild("Rebirths")
+
+        local rebirthRemote = ReplicatedStorage.rEvents.rebirthRemote
+        local equipPetEvent = ReplicatedStorage.rEvents.equipPetEvent
+
+        local function unequipAllPets()
+            local f = LocalPlayer:WaitForChild("petsFolder")
+            for _, h in pairs(f:GetChildren()) do
+                if h:IsA("Folder") then
+                    for _, j in pairs(h:GetChildren()) do
+                        equipPetEvent:FireServer("unequipPet", j)
+                    end
+                end
+            end
+        end
+
+        local function equipPet(petName)
+            unequipAllPets()
+            task.wait(0.05)
+            for _, n in pairs(LocalPlayer.petsFolder.Unique:GetChildren()) do
+                if n.Name == petName then
+                    equipPetEvent:FireServer("equipPet", n)
+                end
+            end
+        end
+
+        while true do
+            local neededStrength = globalFunctions.calculateRequiredRebirthStrength(Rebirths.Value, LocalPlayer)
+            equipPet("Swift Samurai")
+
+            while Strength.Value < neededStrength do
+                for i = 1, 10 do
+                    LocalPlayer.muscleEvent:FireServer("rep")
+                end
+                task.wait()
+            end
+
+            equipPet("Tribal Overlord")
+            local oldRebirths = Rebirths.Value
+
+            repeat
+                rebirthRemote:InvokeServer("rebirthRequest")
+                task.wait()
+            until Rebirths.Value > oldRebirths
+
+            task.wait(1)
+        end
+    end)
+end)
+
+-- =====================================
+-- ðŸ”¹ Auto EGG / x2 Strength
+-- =====================================
+main:AddSwitch("Auto EGG / x2 Strength", function(state)
+    autoEatEnabled = state
+    if not state then return end
+
+    task.spawn(function()
+        while autoEatEnabled do
+            local backpack = LocalPlayer:WaitForChild("Backpack")
+            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+            local egg = backpack:FindFirstChild("Protein Egg")
+            if egg then
+                egg.Parent = character
+                pcall(function()
+                    egg:Activate()
+                end)
+            end
+
+            task.wait(1800) -- cada 30 minutos
+        end
+    end)
+end)
+
+-- =========================
+-- ðŸ“Œ PESTAÃ‘A SUPPORT
+-- =========================
+local supportTab = window:AddTab("Support")
+
+supportTab:AddSwitch("Anti AFK", function(state)
+    if state then
+        local func = loadstring(game:HttpGet("https://raw.githubusercontent.com/omegadezzhub/COMANDOS-/refs/heads/main/AntiAFK", true))
+        if func then func() end
+    end
+end)
+
+local function EquipPets(petName)
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local petsFolder = LocalPlayer:FindFirstChild("petsFolder")
+    if not petsFolder then return warn("âš ï¸ No se encontrÃ³ petsFolder") end
+
+    for _, folder in pairs(petsFolder:GetChildren()) do
+        if folder:IsA("Folder") then
+            for _, pet in pairs(folder:GetChildren()) do
+                ReplicatedStorage.rEvents.equipPetEvent:FireServer("unequipPet", pet)
+            end
+        end
+    end
+    task.wait(0.1)
+
+    local equipped = 0
+    for _, folder in pairs(petsFolder:GetChildren()) do
+        if folder:IsA("Folder") then
+            for _, pet in pairs(folder:GetChildren()) do
+                if pet.Name == petName then
+                    ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", pet)
+                    equipped += 1
+                    if equipped >= 8 then
+                        print("âœ… Se equiparon 8 " .. petName)
+                        return
+                    end
+                end
+            end
+        end
+    end
+    print("âœ… Se equiparon " .. equipped .. " " .. petName)
+end
+
+supportTab:AddButton("Equip Swift Samurai", function() EquipPets("Swift Samurai") end)
+supportTab:AddButton("Equip Wild Wizard", function() EquipPets("Wild Wizard") end)
+supportTab:AddButton("Equip Tribal Overlord", function() EquipPets("Tribal Overlord") end)
+supportTab:AddButton("Equip Mighty Monster", function() EquipPets("Mighty Monster") end)
+
+-- =========================
+-- ðŸ“Œ PESTAÃ‘A ESPECTEAR
+-- =========================
+local spectateTab = window:AddTab("Espectear")
+
+local targetPlayerName = nil
+local spying = false
+
+local spyTargetDropdown = spectateTab:AddDropdown("Seleccionar Objetivo", function(name)
+    targetPlayerName = name
+end)
+
+for _, player in ipairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        spyTargetDropdown:Add(player.Name)
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        spyTargetDropdown:Add(player.Name)
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    if player ~= LocalPlayer then
+        spyTargetDropdown:Clear()
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                spyTargetDropdown:Add(plr.Name)
+            end
+        end
+    end
+end)
+
+spectateTab:AddSwitch("Espectear al Jugador", function(state)
+    spying = state
+    local cam = workspace.CurrentCamera
+
+    if not spying then
+        cam.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") or LocalPlayer
+        return
+    end
+
+    task.spawn(function()
+        while spying do
+            local target = Players:FindFirstChild(targetPlayerName)
+            if target and target ~= LocalPlayer then
+                local humanoid = target.Character and target.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    cam.CameraSubject = humanoid
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end)
+
+-- ðŸ”¹ Remover animaciones de puÃ±os
+spectateTab:AddButton("Remover Animacion de PuÃ±os", function()
+    local blockedAnimations = {
+        ["rbxassetid://3638729053"] = true,
+        ["rbxassetid://3638767427"] = true,
+    }
+
+    local function stopBlockedAnimations()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local humanoid = char:FindFirstChild("Humanoid")
+        if not humanoid then return end
+
+        for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+            if track.Animation then
+                local id = track.Animation.AnimationId
+                local name = track.Name:lower()
+                if blockedAnimations[id] or name:match("punch") or name:match("attack") or name:match("right") then
+                    track:Stop()
+                end
+            end
+        end
+    end
+
+    -- Ejecuta el bloqueo cada medio segundo
+    game:GetService("RunService").Heartbeat:Connect(function()
+        stopBlockedAnimations()
+    end)
+end)
+
+-- =========================
+-- ðŸ“Œ PESTAÃ‘A ESTADISTICAS
+-- =========================
+
+local LookDura = window:AddTab("STATS")
+
+local SelectPlayerName = ""
+
+local PlayerDrop = LookDura:AddDropdown("Seleccionar Jugador", function(Value)
+    SelectPlayerName = Value:match("| (.+)")
+    previousValues = {}
+end)
+
+local Playerslist = {}
+for _, Plr in pairs(game:GetService("Players"):GetPlayers()) do
+    local displayName = Plr.DisplayName .. " | " .. Plr.Name
+    table.insert(Playerslist, displayName)
+end
+for _, AddPlr in ipairs(Playerslist) do
+    PlayerDrop:Add(AddPlr)
+end
+
+local function FormatNumberWithCommas(number)
+    local formatted = tostring(number):reverse():gsub("(%d%d%d)", "%1,"):reverse()
+    return formatted:gsub("^,", "")
+end
+
+local function FormatAbbreviated(number)
+    local abbreviations = {"", "K", "M", "B", "T", "Qa", "Qi"}
+    local abbreviationIndex = 1
+    while number >= 1000 do
+        number = number / 1000
+        abbreviationIndex = abbreviationIndex + 1
+    end
+    return string.format("%.2f", number) .. abbreviations[abbreviationIndex]
+end
+
+local function FormatDisplay(value)
+    local normal = FormatNumberWithCommas(value)
+    local abbreviated = FormatAbbreviated(value)
+    return "[ " .. normal .. " | " .. abbreviated .. " ]"
+end
+
+local previousValues = {}
+
+local Update = LookDura:AddLabel("")
+local Update1 = LookDura:AddLabel("")
+local Update2 = LookDura:AddLabel("")
+local Update3 = LookDura:AddLabel("")
+local Update4 = LookDura:AddLabel("")
+local Update5 = LookDura:AddLabel("")
+local Update6 = LookDura:AddLabel("")
+local Update9 = LookDura:AddLabel("")
+local Update10 = LookDura:AddLabel("")
+local Update11 = LookDura:AddLabel("")
+local Update12 = LookDura:AddLabel("")
+local Update13 = LookDura:AddLabel("")
+
+task.spawn(function()
+    while task.wait(0) do
+        if SelectPlayerName ~= "" then
+            local player = game.Players:FindFirstChild(SelectPlayerName)
+            if player then
+                if player:FindFirstChild("Gems") then
+                    Update1.Text = "Gemas: " .. FormatDisplay(player.Gems.Value)
+                end
+                if player:FindFirstChild("Agility") then
+                    Update3.Text = "Agilidad: " .. FormatDisplay(player.Agility.Value)
+                end
+                if player:FindFirstChild("Durability") then
+                    Update4.Text = "Durabilidad: " .. FormatDisplay(player.Durability.Value)
+                end
+                if player:FindFirstChild("muscleKingTime") then
+                    Update6.Text = "Tiempo en Muscle King: " .. FormatDisplay(player.muscleKingTime.Value)
+                end
+                if player:FindFirstChild("customSize") then
+                    Update10.Text = "TamaÃ±o Personalizado: " .. FormatDisplay(player.customSize.Value)
+                end
+                if player:FindFirstChild("customSpeed") then
+                    Update11.Text = "Velocidad Personalizada: " .. FormatDisplay(player.customSpeed.Value)
+                end
+                if player:FindFirstChild("evilKarma") then
+                    Update12.Text = "Karma Malvada: " .. FormatDisplay(player.evilKarma.Value)
+                end
+                if player:FindFirstChild("goodKarma") then
+                    Update13.Text = "Karma Buena: " .. FormatDisplay(player.goodKarma.Value)
+                end
+
+                local leaderstats = player:FindFirstChild("leaderstats")
+                if leaderstats then
+                    if leaderstats:FindFirstChild("Strength") then
+                        Update.Text = "Fuerza: " .. FormatDisplay(leaderstats.Strength.Value)
+                    end
+                    if leaderstats:FindFirstChild("Rebirths") then
+                        Update2.Text = "Renacimientos: " .. FormatDisplay(leaderstats.Rebirths.Value)
+                    end
+                    if leaderstats:FindFirstChild("Kill") then
+                        Update5.Text = "Muertes: " .. FormatDisplay(leaderstats.Kills.Value)
+                    end
+                end
+
+                if player:FindFirstChild("currentMap") then
+                    Update9.Text = "Mapa Actual: " .. tostring(player.currentMap.Value)
+                else
+                    Update9.Text = "Mapa Actual: Aucune donnÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©e"
+                end
+            end
+        end
+    end
+end)
+
+Misc:AddLabel("DOES NOT eliminate PROTEIN EGGS")
+
+local autoEatBoostsEnabled = false
+
+local boostsList = {
+    "ULTRA Shake",
+    "TOUGH Bar",
+    "Protein Shake",
+    "Energy Shake",
+    "Protein Bar",
+    "Energy Bar",
+    "Tropical Shake"
+}
+
+local function eatAllBoosts()
+    local player = game.Players.LocalPlayer
+    local backpack = player:WaitForChild("Backpack")
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    for _, boostName in ipairs(boostsList) do
+        local boost = backpack:FindFirstChild(boostName)
+        while boost do
+            boost.Parent = character
+            pcall(function()
+                boost:Activate()
+            end)
+            task.wait(0)
+            boost = backpack:FindFirstChild(boostName)
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        if autoEatBoostsEnabled then
+            eatAllBoosts()
+            task.wait(2)
+        else
+            task.wait(1)
+        end
+    end
+end)
+
+Misc:AddSwitch("Auto Clean Inventory", function(state)
+    autoEatBoostsEnabled = state
+end)
