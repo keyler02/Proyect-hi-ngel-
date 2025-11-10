@@ -635,7 +635,6 @@ local RebirthFolder = AutoFarm:AddFolder("Rebirth")
 -- ðŸ” Fast Rebirths
 RebirthFolder:AddSwitch("Fast Rebirths", function(state)
     getgenv().FastRebirth = false
-
 local function startFastRebirth()
     local rebirths = leaderstats:FindFirstChild("Rebirths")
     if not rebirths then
