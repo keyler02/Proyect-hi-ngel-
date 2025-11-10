@@ -724,8 +724,12 @@ RebirthFolder:AddSwitch("Fast Rebirths", function(state)
         rebirths.Value += rebirthIncremento
         strength.Value = 0
         task.wait(rebirthIntervalo)
+  end
+                task.wait()
+            end
+        end)
     end
-end
+end)
 -- ðŸ”’ Lock Position
 RebirthFolder:AddSwitch("Lock Position", function(Value)
     if Value then
