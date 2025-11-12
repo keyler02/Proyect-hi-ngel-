@@ -1,5 +1,5 @@
 -- âš™ï¸ LibrerÃ­a de interfaz
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/HonnyDezz/pruebas/refs/heads/main/libreria%203", true))()
+cal library = loadstring(game:HttpGet("https://raw.githubusercontent.com/HonnyDezz/pruebas/refs/heads/main/libreria%203", true))()
 
 local window = library:AddWindow("OMEGADEZZ LEGENDS VIP / By HonnyDezz", {
     main_color = Color3.fromRGB(255, 119, 0),
